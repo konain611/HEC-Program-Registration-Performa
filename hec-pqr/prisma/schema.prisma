@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ProgramRegistration {
+  id                    String   @id @default(cuid())
+  heiName               String
+  campusName            String
+  departmentName        String
+  qualificationLevel    String
+  programEquivalent     String
+  degreeAbbreviation    String
+  eligibilityCriteria   String   @db.Text
+  accreditationStatus   String
+  fieldOfStudy          String
+  subject               String
+  educationSystem       String
+  modeOfStudy           String
+  sessionType           String
+  areaOfSpecialization  String
+  otherSpecialization   String
+  creditHours           Int
+  programDuration       String
+  semesterCount         Int
+  minimumDuration       String
+  maximumDuration       String
+  degreeStartDate       DateTime @db.Date
+  degreeEndDate         DateTime @db.Date
+  isCurrent             Boolean
+  recognitionDate       DateTime @db.Date
+  nocObtained           String
+  documentStatuses      Json
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

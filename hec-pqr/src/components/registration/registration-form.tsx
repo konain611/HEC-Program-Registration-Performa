@@ -26,6 +26,7 @@ export function RegistrationForm({
 }) {
   const [validationMessage, setValidationMessage] = useState("");
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleFieldChange(event: FormEvent<HTMLFormElement>) {
     const form = event.currentTarget;
@@ -45,9 +46,10 @@ export function RegistrationForm({
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
+    if (isSubmitting) return;
     setHasAttemptedValidation(true);
     updateDateValidity(form);
 
@@ -58,8 +60,39 @@ export function RegistrationForm({
       return;
     }
 
-    setValidationMessage("All required fields are valid.");
-    onValidSubmit();
+    const values = Object.fromEntries(new FormData(form).entries());
+    const documentStatuses = Object.fromEntries(
+      Array.from({ length: 6 }, (_, index) => {
+        const key = `document-${index}`;
+        return [key, values[key]];
+      }),
+    );
+    const registrationFields = Object.fromEntries(
+      Object.entries(values).filter(([key]) => !key.startsWith("document-")),
+    );
+
+    setIsSubmitting(true);
+    setValidationMessage("Saving your registration...");
+    try {
+      const response = await fetch("/api/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...registrationFields, documentStatuses }),
+      });
+      const result: { error?: string } = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error ?? "The registration could not be saved. Please try again.");
+      }
+
+      setValidationMessage("Registration saved. Preparing your PDF...");
+      onValidSubmit();
+    } catch (error) {
+      setValidationMessage(
+        error instanceof Error ? error.message : "The registration could not be saved. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleReset() {
@@ -104,7 +137,15 @@ export function RegistrationForm({
         <div className="flex flex-col gap-4 bg-slate-50 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div aria-live="polite" role="status" className="max-w-xl text-sm leading-6">
             {validationMessage ? (
-              <p className={validationMessage.startsWith("All required") ? "font-medium text-accent" : "text-red-700"}>
+              <p
+                className={
+                  validationMessage.startsWith("All required") ||
+                  validationMessage.startsWith("Saving") ||
+                  validationMessage.startsWith("Registration saved")
+                    ? "font-medium text-accent"
+                    : "text-red-700"
+                }
+              >
                 {validationMessage}
               </p>
             ) : (
@@ -117,14 +158,16 @@ export function RegistrationForm({
             <button
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               type="reset"
+              disabled={isSubmitting}
             >
               Clear form
             </button>
             <button
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#2b8068] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               type="submit"
+              disabled={isSubmitting}
             >
-              Download PDF
+              {isSubmitting ? "Saving..." : "Save & Download PDF"}
             </button>
           </div>
         </div>

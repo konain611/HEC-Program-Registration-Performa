@@ -145,7 +145,7 @@ export function DocumentsSection() {
       description="Select a status for every document."
     >
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+        <table className="w-full min-w-140 border-collapse text-left text-sm">
           <thead>
             <tr className="border-y border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
               <th scope="col" className="w-12 px-3 py-3">S.No</th>

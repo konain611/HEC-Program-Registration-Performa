@@ -1,5 +1,18 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Database setup
+
+Set `DATABASE_URL` in `.env` to the connection string for your PostgreSQL database.
+Then apply the checked-in Prisma migration:
+
+```bash
+npx prisma migrate deploy
+```
+
+The `dev` and `build` scripts generate the Prisma client automatically. Submitting a
+valid registration saves its program details and document checklist statuses before
+opening the print dialog.
+
 ## Getting Started
 
 First, run the development server:
